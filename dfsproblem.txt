@@ -26,19 +26,16 @@ def build_tree():
 
     print("Enter the node value and the child nodes. If no children, enter ' - ': ")
    
-    entered_nodes = 0
     for _ in range(n_n):
         while True:
-            value = input(" ").strip()
-            value = value.split()
-            if len(value) < 1:
+            value = input(" ").strip().split()
+            if not value:
                 print("Please enter at least one node value.")
                 continue
            
             node_value = value[0]
             try:
-                # Check if the node value is an integer
-                int(node_value)
+                int(node_value)  # Validate node value is an integer
             except ValueError:
                 print(f"Node value '{node_value}' is not a valid integer.")
                 continue
@@ -46,25 +43,21 @@ def build_tree():
             if node_value not in nodes:
                 nodes[node_value] = TreeNode(node_value)
 
-            if len(value) == 1 and value[0] == '-':
+            if value == ['-'] or (len(value) == 1):
                 print("Root node cannot be just '-' without value.")
                 continue
-           
-            if len(value) == 1 or (len(value) == 2 and value[1] == '-'):
-                entered_nodes += 1
-                break  # No children, break to process next node
 
-            for c_v in value[1:]:
-                if c_v != '-' and c_v not in nodes:
-                    nodes[c_v] = TreeNode(c_v)
-                if c_v != '-':
-                    nodes[node_value].children.append(nodes[c_v])
+            for child_value in value[1:]:
+                if child_value != '-' and child_value not in nodes:
+                    nodes[child_value] = TreeNode(child_value)
+                if child_value != '-':
+                    nodes[node_value].children.append(nodes[child_value])
            
-            entered_nodes += 1
-            break
+            break  # Exit loop for this node entry
    
-    if entered_nodes != n_n:
-        print(f"Number of entered nodes ({entered_nodes}) does not match the specified number of nodes ({n_n}).")
+    # Check if we actually have the right count of nodes
+    if len(nodes) != n_n:
+        print(f"Number of entered nodes does not match the specified number ({n_n}).")
         return None
 
     return nodes[next(iter(nodes))], nodes
@@ -89,10 +82,8 @@ def generate_arr(root, nodes, arr=None, index=0):
         arr.append(root.value)
    
     if not root.children:
-        arr.append('-')
-        arr.append('-')
+        arr.extend(['-', '-'])
     else:
-   
         child_values = [child.value for child in root.children]
         if len(child_values) == 1:
             arr.extend(child_values)
@@ -105,7 +96,6 @@ def generate_arr(root, nodes, arr=None, index=0):
             ar_val = arr[index]
             generate_arr(nodes[ar_val], nodes, arr, index)
     return arr
-
 
 def tree_printer(arr, num_lvl):
     current_level = 0
@@ -130,11 +120,9 @@ def tree_printer(arr, num_lvl):
 def find_depth(root):
     if root is None:
         return -1
-
     if not root.children:
         return 0
     child_depths = [find_depth(child) for child in root.children]
-   
     return 1 + max(child_depths)
 
 def main():
@@ -142,16 +130,14 @@ def main():
     if not root:
         return
    
-    arr = generate_arr(root,nodes)
+    arr = generate_arr(root, nodes)
    
     search_value = input("Enter the value to search for: ")
-   
     if not search_value.isdigit():
         print("Invalid input. Please enter a valid integer.")
         return
 
     path = dfs(root, search_value)
-   
     if path:
         print(f"Path = {' -> '.join(path)}")
     else:
