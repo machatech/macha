@@ -49,98 +49,67 @@ def findWinningMove(magicSquare, n, moves, available_numbers):
     return None
 
 def tossForFirstPlayer():
-    ch = random.choice([0, 1])
-    print('Toss result: ', ch)
-    return ch
+    return random.choice([0, 1])
 
 def playGame(magicSquare, n):
     available_numbers = [num for row in magicSquare for num in row]
-    player_moves = []
-    computer_moves = []
+    player_moves, computer_moves = [], []
+
     printMagicSquareWithMoves(magicSquare, player_moves, computer_moves, " ", " ")
-   
+
     while True:
         human_choice = input('Select a number "0" or "1" for the toss: ')
         if human_choice not in ['0', '1']:
             print("Invalid input. Please enter 0 or 1.")
             continue
         break
-   
+
     toss_result = tossForFirstPlayer()
     if human_choice == str(toss_result):
-        print("Human won the toss!!")
-        player_symbol = 'X'
-        computer_symbol = 'O'
-        current_player = 'X'
+        print("Human won the toss!")
+        player_symbol, computer_symbol = 'X', 'O'
+        current_player = 'Human'
     else:
-        print("Computer won the toss!!")
-        player_symbol = 'O'
-        computer_symbol = 'X'
-        current_player = 'X'
+        print("Computer won the toss!")
+        player_symbol, computer_symbol = 'O', 'X'
+        current_player = 'Computer'
 
     for turn in range(n * n):
-        if current_player == 'X':
-            if computer_symbol == 'X':
-                winning_move = findWinningMove(magicSquare, n, computer_moves, available_numbers)
-                if winning_move is not None:
-                    computer_move = winning_move
-                else:
-                    blocking_move = findWinningMove(magicSquare, n, player_moves, available_numbers)
-                    if blocking_move is not None:
-                        computer_move = blocking_move
+        if current_player == 'Human':
+            print(f"Available numbers: {available_numbers}")
+            while True:
+                try:
+                    player_move = int(input("Select a number from the board: "))
+                    if player_move in available_numbers:
+                        player_moves.append(player_move)
+                        available_numbers.remove(player_move)
+                        break
                     else:
-                        computer_move = random.choice(available_numbers)
-                print(f"Computer's choice: {computer_move}")
-                computer_moves.append(computer_move)
-                available_numbers.remove(computer_move)
-            else:
-                while True:
-                    print(f"Available numbers: {available_numbers}")
-                    player_move = input(f"Select number from the board: ")
-                    if not player_move.isdigit() or int(player_move) not in available_numbers:
                         print("Invalid choice. Choose from the available numbers.")
-                        continue
-                    player_move = int(player_move)
-                    break
-            player_moves.append(player_move)
-            available_numbers.remove(player_move)
-            current_player = 'O'
+                except ValueError:
+                    print("Invalid input. Please enter a number.")
+            current_player = 'Computer'
         else:
-            if player_symbol == 'O':
-                while True:
-                    print(f"Available numbers: {available_numbers}")
-                    player_move = input(f"Select number from the board: ")
-                    if not player_move.isdigit() or int(player_move) not in available_numbers:
-                        print("Invalid choice. Choose from the available numbers.")
-                        continue
-                    player_move = int(player_move)
-                    break
-                player_moves.append(player_move)
-                available_numbers.remove(player_move)
+            winning_move = findWinningMove(magicSquare, n, computer_moves, available_numbers)
+            if winning_move is not None:
+                computer_move = winning_move
             else:
-                winning_move = findWinningMove(magicSquare, n, computer_moves, available_numbers)
-                if winning_move is not None:
-                    computer_move = winning_move
-                else:
-                    blocking_move = findWinningMove(magicSquare, n, player_moves, available_numbers)
-                    if blocking_move is not None:
-                        computer_move = blocking_move
-                    else:
-                        computer_move = random.choice(available_numbers)
-                print(f"Computer's choice: {computer_move}")
-                computer_moves.append(computer_move)
-                available_numbers.remove(computer_move)
-            current_player = 'X'
-       
+                blocking_move = findWinningMove(magicSquare, n, player_moves, available_numbers)
+                computer_move = blocking_move if blocking_move else random.choice(available_numbers)
+            print(f"Computer's choice: {computer_move}")
+            computer_moves.append(computer_move)
+            available_numbers.remove(computer_move)
+            current_player = 'Human'
+
         printMagicSquareWithMoves(magicSquare, player_moves, computer_moves, player_symbol, computer_symbol)
-       
+
         if checkWin(magicSquare, n, computer_moves):
             print("Computer wins!")
             return
         elif checkWin(magicSquare, n, player_moves):
             print("Player wins!")
             return
-   
+
     print("It's a draw!")
 
 def main():
@@ -149,10 +118,9 @@ def main():
         playGame(magicSquare, 3)
         while True:
             play_again = input("Would you like to play again? (yes/no): ").lower()
-            if play_again not in ['yes', 'no']:
-                print("Invalid input. Please enter either 'yes' or 'no'.")
-                continue
-            break
+            if play_again in ['yes', 'no']:
+                break
+            print("Invalid input. Please enter either 'yes' or 'no'.")
 
         if play_again == 'no':
             print("Thanks for playing!")
