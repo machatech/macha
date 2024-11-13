@@ -26,19 +26,16 @@ def build_tree():
 
     print("Enter the node value and the child nodes. If no children, enter ' - ': ")
    
-    entered_nodes = 0
     for _ in range(n_n):
         while True:
-            value = input(" ").strip()
-            value = value.split()
-            if len(value) < 1:
+            value = input(" ").strip().split()
+            if not value:
                 print("Please enter at least one node value.")
                 continue
            
             node_value = value[0]
             try:
-                # Check if the node value is an integer
-                int(node_value)
+                int(node_value)  # Check if the node value is an integer
             except ValueError:
                 print(f"Node value '{node_value}' is not a valid integer.")
                 continue
@@ -46,36 +43,29 @@ def build_tree():
             if node_value not in nodes:
                 nodes[node_value] = TreeNode(node_value)
 
-            if len(value) == 1 and value[0] == '-':
+            if value == ['-']:
                 print("Root node cannot be just '-' without value.")
                 continue
-           
-            if len(value) == 1 or (len(value) == 2 and value[1] == '-'):
-                entered_nodes += 1
-                break  # No children, break to process next node
 
-            for c_v in value[1:]:
-                if c_v != '-' and c_v not in nodes:
-                    nodes[c_v] = TreeNode(c_v)
-                if c_v != '-':
-                    nodes[node_value].children.append(nodes[c_v])
+            for child_value in value[1:]:
+                if child_value != '-' and child_value not in nodes:
+                    nodes[child_value] = TreeNode(child_value)
+                if child_value != '-':
+                    nodes[node_value].children.append(nodes[child_value])
            
-            entered_nodes += 1
-            break
+            break  # Exit loop for this node entry
    
-    if entered_nodes != n_n:
-        print(f"Number of entered nodes ({entered_nodes}) does not match the specified number of nodes ({n_n}).")
+    if len(nodes) != n_n:
+        print(f"Number of entered nodes does not match the specified number ({n_n}).")
         return None
 
     return nodes[next(iter(nodes))], nodes
 
 def bfs(root, search_value):
     queue = [(root, [root.value])]
-    i = 0  
    
-    while i < len(queue):
-        node, path = queue[i]
-        i += 1
+    while queue:
+        node, path = queue.pop(0)
        
         if node.value == search_value:
             return path
@@ -85,29 +75,20 @@ def bfs(root, search_value):
    
     return None
 
-def generate_arr(root, nodes, arr=None, index=0):
+def generate_arr(root, nodes, arr=None):
     if arr is None:
-        arr = []
-        arr.append(root.value)
+        arr = [root.value]
    
     if not root.children:
-        arr.append('-')
-        arr.append('-')
+        arr.extend(['-', '-'])
     else:
-   
         child_values = [child.value for child in root.children]
-        if len(child_values) == 1:
-            arr.extend(child_values)
-            arr.append('-')
-        else:
-            arr.extend(child_values)
-    index += 1
-    if index < len(arr):
-        if arr[index] in nodes:
-            ar_val = arr[index]
-            generate_arr(nodes[ar_val], nodes, arr, index)
-    return arr
+        arr.extend(child_values + ['-'] * (2 - len(child_values)))
 
+    for child_value in child_values:
+        if child_value in nodes:
+            generate_arr(nodes[child_value], nodes, arr)
+    return arr
 
 def tree_printer(arr, num_lvl):
     current_level = 0
@@ -132,19 +113,16 @@ def tree_printer(arr, num_lvl):
 def find_depth(root):
     if root is None:
         return -1
-
     if not root.children:
         return 0
-    child_depths = [find_depth(child) for child in root.children]
-   
-    return 1 + max(child_depths)
+    return 1 + max(find_depth(child) for child in root.children)
 
 def main():
     root, nodes = build_tree()
     if not root:
         return
    
-    arr = generate_arr(root,nodes)
+    arr = generate_arr(root, nodes)
    
     search_value = input("Enter the value to search for: ")
    
